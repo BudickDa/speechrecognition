@@ -2,6 +2,7 @@ package eu.budick;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.util.Arrays;
 
@@ -11,21 +12,55 @@ import java.util.Arrays;
 public class Vector {
     private float[] values;
 
-    Vector(){
+    Vector() {
         this.setValues(new float[13]);
         Arrays.fill(this.getValues(), 0);
     }
 
-    Vector(float[] values){
+    Vector(float[] values) {
         this.setValues(values);
     }
 
-    public float getValue(int index){
+    public float getValue(int index) {
         return this.getValues()[index];
     }
 
-    public void setValue(int index, float value){
+    public void setValue(int index, float value) {
         this.values[index] = value;
+    }
+
+    public int length() {
+        return this.values.length;
+    }
+
+    /**
+     * Some Math function
+     */
+
+    public Vector add(Vector v) {
+        Vector result = new Vector();
+        for (int i = 0; i < this.length(); i++) {
+            result.setValue(i, this.getValue(i) + v.getValue(i));
+        }
+        return result;
+    }
+
+    public Vector divideByValue(float value) {
+        Vector result = new Vector();
+        for (int i = 0; i < this.length(); i++) {
+            result.setValue(i, this.getValue(i) / value);
+        }
+        return result;
+    }
+
+    public Vector normalize(Vector meanVector, Vector deviationVector) {
+        Vector result = new Vector();
+        for (int i = 0; i < this.length(); i++) {
+            float newValue = (this.getValue(i) - meanVector.getValue(i)) / deviationVector.getValue(i);
+            result.setValue(i, newValue);
+        }
+        return result;
+
     }
 
     public double getEuclidDistance(Vector otherVector) {
@@ -37,6 +72,7 @@ public class Vector {
     }
 
     public void load(String fileName) {
+        fileName = Util.getVectorPath(fileName);
         float[] result = new float[13];
         byte[] tmp;
         try {
@@ -67,5 +103,9 @@ public class Vector {
 
     public void setValues(float[] values) {
         this.values = values;
+    }
+
+    public void print() {
+        System.out.println(Arrays.toString(this.getValues()));
     }
 }
