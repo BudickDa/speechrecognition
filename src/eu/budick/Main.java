@@ -28,7 +28,5 @@ public class Main {
         reference.load(trainingCases.get(1));
         System.out.println(dtw.classify(reference, test));
         dtw.print();
-
-        System.out.println(Arrays.toString(dtw.path.get(3)));
     }
 }

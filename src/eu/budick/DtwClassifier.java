@@ -38,7 +38,6 @@ public class DtwClassifier extends Classifier {
                 edges.add(this.DTW[i - 1][j - 1]);
                 float minValue = Util.min(edges);
                 int direction = 1 << edges.indexOf(minValue);
-                System.out.println(direction);
                 this.drawPath(i, j, direction);
                 this.DTW[i][j] = cost + minValue;
             }
