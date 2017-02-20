@@ -14,7 +14,7 @@ public class Main {
         ArrayList<String> phonemeList = Util.getListFromFile("/Listen/phonemes.txt");
         ArrayList<String> allWav = Util.getListFromFile("/Listen/all.txt");
 
-        Microphone micro = Microphone.getInstance();
+        Blackboard blackboard = Blackboard.getInstance();
 
         Scanner keyboard = new Scanner(System.in);
         boolean exit = false;
@@ -27,11 +27,7 @@ public class Main {
                     System.out.println("Exit programm");
                     exit = true;
                 } else if ("x".equals(input)) {
-                    if (active) {
-                        micro.deactivate();
-                    } else {
-                        micro.activate();
-                    }
+                    blackboard.toggleMicrophone();
                 } else if ("n".equals(input)) {
                     NearestNeighbour nn = new NearestNeighbour();
                     nn.train(trainingCases, phonemeList);
