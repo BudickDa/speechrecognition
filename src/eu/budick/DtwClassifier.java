@@ -8,20 +8,20 @@ import java.util.Arrays;
  */
 public class DtwClassifier extends Classifier {
     float[][] DTW;
-    ArrayList<int[]> path = new ArrayList<>();
+    int[][] path;
 
     public float classify(Vector reference, Vector test) {
         return this.getDtwDistance(reference, test);
     }
 
-    public void drawPath(int i, int j, int direction) {
-        int[] pathItem = {i, j, direction};
-        path.add(pathItem);
+    public void setPath(int i, int j, int direction) {
+        this.path[i][j] = direction;
     }
 
     public float getDtwDistance(Vector v1, Vector v2) {
         float cost;
         this.DTW = new float[v1.length()][v2.length()];
+        this.path = new int[v1.length()][v2.length()];
         for (int i = 0; i > v1.length(); i++) {
             this.DTW[i][0] = Float.POSITIVE_INFINITY;
         }
@@ -38,7 +38,7 @@ public class DtwClassifier extends Classifier {
                 edges.add(this.DTW[i - 1][j - 1]);
                 float minValue = Util.min(edges);
                 int direction = 1 << edges.indexOf(minValue);
-                this.drawPath(i, j, direction);
+                this.setPath(i, j, direction);
                 this.DTW[i][j] = cost + minValue;
             }
         }
@@ -46,10 +46,25 @@ public class DtwClassifier extends Classifier {
     }
 
     public void print() {
-        for (int i = 0; i < this.DTW[0].length; i++) {
+        for (int i = this.DTW.length - 1; i >= 0; --i) {
             System.out.print('|');
             for (int j = 0; j < this.DTW[i].length; j++) {
-                System.out.print(" " + this.DTW[i][j] + '|');
+                System.out.print(" " + Math.floor(this.DTW[i][j]*10)/10 + " |");
+            }
+            System.out.println("");
+        }
+    }
+    public void printPath() {
+        for (int i = this.path.length - 1; i >= 0; --i) {
+            for (int j = 0; j < this.path[i].length; j++) {
+                String symbol = "-";
+                if(this.path[i][j]==2){
+                    symbol = "|";
+                }
+                if(this.path[i][j]==4){
+                    symbol = "/";
+                }
+                System.out.print(" " + symbol + " ");
             }
             System.out.println("");
         }

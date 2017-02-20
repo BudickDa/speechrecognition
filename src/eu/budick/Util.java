@@ -69,6 +69,11 @@ public class Util {
         return vectorDirName + "/" + fileName.replace(".WAV", ".cep");
     }
 
+    public static String getWavPath(String fileName) {
+        String vectorDirName = Util.resourcesDirectory.getAbsolutePath() + "/WAV";
+        return vectorDirName + "/" + fileName;
+    }
+
     public static ArrayList<String> getListFromFile(String fileName) {
         ArrayList<String> result = new ArrayList<String>();
         try {
