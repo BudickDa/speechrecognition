@@ -1,56 +1,22 @@
 package eu.budick;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.TargetDataLine;
-import java.util.ArrayList;
-import java.util.Scanner;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
-public class Main {
+public class Main extends Application {
+
+    @Override
+    public void start(Stage primaryStage) throws Exception{
+        Parent root = FXMLLoader.load(getClass().getResource("ui/ui.fxml"));
+        primaryStage.setScene(new Scene(root, 600, 400));
+        primaryStage.show();
+    }
+
 
     public static void main(String[] args) {
-        ArrayList<String> trainingCases = Util.getListFromFile("/Listen/training.txt");
-        ArrayList<String> testCases = Util.getListFromFile("/Listen/test.txt");
-        ArrayList<String> phonemeList = Util.getListFromFile("/Listen/phonemes.txt");
-        ArrayList<String> allWav = Util.getListFromFile("/Listen/all.txt");
-
-        Blackboard blackboard = Blackboard.getInstance();
-
-        Scanner keyboard = new Scanner(System.in);
-        boolean exit = false;
-        boolean active = false;
-        while (!exit) {
-            String input = keyboard.nextLine();
-            if (input != null) {
-                System.out.println("Your input is : " + input);
-                if ("quit".equals(input)) {
-                    System.out.println("Exit programm");
-                    exit = true;
-                } else if ("x".equals(input)) {
-                    blackboard.toggleMicrophone();
-                } else if ("n".equals(input)) {
-                    NearestNeighbour nn = new NearestNeighbour();
-                    nn.train(trainingCases, phonemeList);
-                    nn.test(testCases);
-                    nn.displayResults();
-                } else if ("g".equals(input)) {
-                    GaussianClassifier gc = new GaussianClassifier();
-                    gc.train(trainingCases, phonemeList);
-                    gc.test(testCases);
-                    gc.displayResults();
-                } else if ("d".equals(input)) {
-                    DtwClassifier dtw = new DtwClassifier();
-                    Vector test = new Vector();
-                    test.load(trainingCases.get(0));
-                    Vector reference = new Vector();
-                    reference.load(trainingCases.get(1));
-                    dtw.classify(reference, test);
-                    dtw.print();
-                    dtw.printPath();
-                }
-
-            }
-        }
-        keyboard.close();
+        launch(args);
     }
 }

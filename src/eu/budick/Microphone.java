@@ -8,105 +8,95 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.TargetDataLine;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by daniel on 20.02.17.
  */
-public class Microphone extends Thread {
-	private boolean active = false;
-	private TargetDataLine microphone;
+public class Microphone implements Runnable {
+    private volatile boolean running = true;
+    private TargetDataLine microphone;
+    private boolean initialized = false;
+    private File wavFile;
+    private List<float[]> lastFeatures;
 
-	AudioFileFormat.Type fileType = AudioFileFormat.Type.WAVE;
+    AudioFileFormat.Type fileType = AudioFileFormat.Type.WAVE;
 
-	private static Microphone ourInstance = new Microphone();
-	
-	private Blackboard blackBoard;
+    private static Microphone ourInstance = null;
 
-	public static Microphone getInstance() {
-		return ourInstance;
-	}
+    public static synchronized Microphone getInstance() {
+        if (ourInstance == null) {
+            ourInstance = new Microphone();
+            ourInstance.init();
+        }
+        return ourInstance;
+    }
 
-	/**
-	 * Closes the target data line to finish capturing and recording
-	 */
-	void finish() {
-		this.active = false;
-		microphone.stop();
-		microphone.close();
-		System.out.println("Finished");
-	}
+    public void activate() {
+        if (!this.running) {
+            this.running = true;
+            this.run();
+        }
+    }
 
-	public void run() {
-		while (this.blackBoard.isListing()) {
-			System.out.println("Listening");
-			// numBytesRead = line.read(data, 0, data.length);
-			// out.write(data, 0, numBytesRead);
-		}
-		this.run();
-	}
+    public void deactivate() {
+        this.running = false;
+    }
 
-	public void activate() {
-		this.active = true;
-		try {
-			// AudioFormat format = new AudioFormat(8000.0f, 16, 1, true, true);
-			// DataLine.Info info = new DataLine.Info(TargetDataLine.class,
-			// format);
-			//
-			// // checks if system supports the data line
-			// if (!AudioSystem.isLineSupported(info)) {
-			// System.out.println("Line not supported");
-			// System.exit(0);
-			// }
-			// microphone = (TargetDataLine) AudioSystem.getLine(info);
-			// microphone.open(format);
-			microphone.start(); // start capturing
+    public List<float[]> getLastFeatures(){
+        return this.lastFeatures;
+    }
 
-			System.out.println("Start capturing...");
+    public void run() {
+        lastFeatures = null;
+        AudioInputStream ais = new AudioInputStream(microphone);
+        String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-m-ss").format(new Date());
+        this.wavFile = new File(Util.resourcesDirectory + "/tmp/Audio" + timeStamp + ".WAV");
+        this.microphone.start(); // start capturing
+        try {
+            wavFile.createNewFile();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+        while (this.running) {
+            try {
+                AudioSystem.write(ais, this.fileType, wavFile);
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }
+        microphone.stop();
+        try {
+            this.lastFeatures = FeatureCreater.getFeatures(new FileInputStream(wavFile));
+        }catch (Exception e){
+            System.out.println("Error: "+e.getMessage());
+        }
+    }
 
-			AudioInputStream ais = new AudioInputStream(microphone);
+    private void init() {
+        if (!this.initialized) {
+            this.initialized = true;
+            AudioFormat format = new AudioFormat(8000.0f, 16, 1, true, true);
+            try {
+                DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
 
-			System.out.println("Start recording...");
+                // checks if system supports the data line
+                if (!AudioSystem.isLineSupported(info)) {
+                    System.out.println("Line not supported");
+                    System.exit(0);
+                }
+                this.microphone = (TargetDataLine) AudioSystem.getLine(info);
+                this.microphone.open(format);
+            } catch (Exception e) {
+                System.out.println("ERROR: " + e.getMessage());
+            }
+        }
+    }
 
-			String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-m-ss").format(new Date());
-
-			File wavFile = new File(Util.resourcesDirectory + "/WAV/Audio" + timeStamp + ".WAV");
-			wavFile.createNewFile();
-
-			AudioSystem.write(ais, fileType, wavFile);
-
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
-	}
-
-	public void deactivate() {
-		this.active = false;
-		this.microphone.stop();
-	}
-
-	private Microphone() {
-		this.blackBoard = Blackboard.getInstance();
-		AudioFormat format = new AudioFormat(8000.0f, 16, 1, true, true);
-		try {
-			DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
-
-			// checks if system supports the data line
-			if (!AudioSystem.isLineSupported(info)) {
-				System.out.println("Line not supported");
-				System.exit(0);
-			}
-			this.microphone = (TargetDataLine) AudioSystem.getLine(info);
-			// this.microphone = AudioSystem.getTargetDataLine(format);
-			this.microphone.open(format);
-
-				this.run();
-			
-		
-		} catch (Exception e) {
-			System.out.println("ERROR: " + e.getMessage());
-		}
-	}
+    private Microphone() {
+    }
 }

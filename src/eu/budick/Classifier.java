@@ -1,5 +1,7 @@
 package eu.budick;
 
+import javafx.scene.control.TextArea;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -16,10 +18,11 @@ public class Classifier implements ClassifierInterface {
     ArrayList<String> phonemeList = new ArrayList<String>();
     File resourcesDirectory = new File("src/eu/budick/resources");
 
-    public void displayResults() {
+    public void displayResults(TextArea ouput) {
         float sum = this.matches + this.errors;
         float percent = (Integer.toUnsignedLong(this.matches) / sum) * 100;
-        System.out.println("Errors: " + this.errors + ", Matches: " + this.matches + ", " + percent + " % correct.");
+        ouput.appendText("Errors: " + this.errors + ", Matches: " + this.matches + ", " + percent + " % correct.");
+        ouput.appendText("\n");
     }
 
     public void train(ArrayList<String> trainingCases, ArrayList<String> phonemeList) {
