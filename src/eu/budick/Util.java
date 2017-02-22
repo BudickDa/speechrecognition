@@ -1,16 +1,15 @@
 package eu.budick;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+import edu.cmu.sphinx.frontend.util.Utterance;
+
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 
 /**
  * Created by daniel on 17.02.17.
@@ -33,12 +32,12 @@ public class Util {
         for (Vector vector : vectors) {
             for (int i = 0; i < vector.length(); i++) {
                 double newValue = deviationVector.getValue(i) + Math.pow(vector.getValue(i) - meanVector.getValue(i), 2);
-                deviationVector.setValue(i, (float)newValue);
+                deviationVector.setValue(i, (float) newValue);
             }
         }
         for (int i = 0; i < deviationVector.length(); i++) {
-            double newValue= Math.sqrt(deviationVector.getValue(i) / vectors.size());
-            deviationVector.setValue(i, (float)newValue);
+            double newValue = Math.sqrt(deviationVector.getValue(i) / vectors.size());
+            deviationVector.setValue(i, (float) newValue);
         }
         return deviationVector;
     }
@@ -89,7 +88,41 @@ public class Util {
         return result;
     }
 
-    public static float min(ArrayList<Float> input){
+    public static float min(ArrayList<Float> input) {
         return Collections.min(input);
+    }
+
+    public static <T> T mostCommon(List<T> list) {
+        Map<T, Integer> map = new HashMap<>();
+        for (T t : list) {
+            Integer val = map.get(t);
+            map.put(t, val == null ? 1 : val + 1);
+        }
+        Map.Entry<T, Integer> max = null;
+        for (Map.Entry<T, Integer> e : map.entrySet()) {
+            if (max == null || e.getValue() > max.getValue())
+                max = e;
+        }
+        return max.getKey();
+    }
+
+    public static Utterance wavToUtterance(File file) {
+        AudioFormat format = new AudioFormat(16000, 6400, 1, true, true);
+        Utterance result = new Utterance(file.getName(), format);
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
+            int read;
+            byte[] buff = new byte[1024];
+
+            while ((read = in.read(buff)) > 0) {
+                out.write(buff, 0, read);
+            }
+            out.flush();
+            result.add(out.toByteArray());
+        } catch (IOException ioe) {
+            System.out.println("Error: " + ioe.getMessage());
+        }
+        return result;
     }
 }

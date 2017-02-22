@@ -1,68 +1,146 @@
 package eu.budick.ui;
 
-import eu.budick.GaussianClassifier;
-import eu.budick.Microphone;
-import eu.budick.NearestNeighbour;
-import eu.budick.Util;
+import edu.cmu.sphinx.frontend.Data;
+import edu.cmu.sphinx.frontend.util.Microphone;
+import edu.cmu.sphinx.frontend.util.Utterance;
+import eu.budick.*;
+import eu.budick.Vector;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-
-import javax.swing.text.View;
-import javax.swing.text.html.ListView;
+import javafx.scene.shape.Circle;
+import javax.sound.sampled.AudioFileFormat;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * Created by daniel on 20.02.17.
  */
 public class Ui implements Initializable {
+    private ArrayList<String> trainingCases = Util.getListFromFile("/Listen/training.txt");
+    private ArrayList<String> testCases = Util.getListFromFile("/Listen/test.txt");
+    private ArrayList<String> phonemeList = Util.getListFromFile("/Listen/phonemes.txt");
+    private ArrayList<String> allWav = Util.getListFromFile("/Listen/all.txt");
 
-    ArrayList<String> trainingCases = Util.getListFromFile("/Listen/training.txt");
-    ArrayList<String> testCases = Util.getListFromFile("/Listen/test.txt");
-    ArrayList<String> phonemeList = Util.getListFromFile("/Listen/phonemes.txt");
-    ArrayList<String> allWav = Util.getListFromFile("/Listen/all.txt");
+
+    private NearestNeighbour nn = new NearestNeighbour();
+    private GaussianClassifier gc = new GaussianClassifier();
+    private DtwClassifier dtw = new DtwClassifier();
+    private Microphone microphone = new Microphone(
+            16000, 16, 1,
+            true, true, false,
+            10, true, "average",
+            0, "default", 6400);
+
+    private boolean recording = false;
 
     @FXML
     public TextArea exerciseTwoOutput;
+
+    @FXML
+    public Circle recordFeedback;
 
     @FXML
     public TextArea exerciseThreeOutput;
 
     @FXML
     private void handleNearestNeighbour(ActionEvent event) {
-        NearestNeighbour nn = new NearestNeighbour();
-        nn.train(trainingCases, phonemeList);
-        nn.test(testCases);
-        nn.displayResults(exerciseTwoOutput);
+        this.nn.displayResults(exerciseTwoOutput);
     }
 
     @FXML
     private void handleGauss(ActionEvent event) {
-        GaussianClassifier gc = new GaussianClassifier();
-        gc.train(trainingCases, phonemeList);
-        gc.test(testCases);
-        gc.displayResults(exerciseTwoOutput);
+        this.gc.displayResults(exerciseTwoOutput);
     }
 
     @FXML
-    private void startListen() {
-        Microphone.getInstance().activate();
+    private void handleDTW(ActionEvent event) {
+        this.dtw.displayResults(exerciseTwoOutput);
     }
+
     @FXML
-    private void stopListen() {
-        Microphone m = Microphone.getInstance();
-        m.deactivate();
-        List<float[]> lastFeatures = m.getLastFeatures();
-        System.out.println(lastFeatures.get(0)[0]);
-
+    private void toggleRecord(Event e) {
+        this.recording = !this.recording;
+        recordFeedback.setVisible(this.recording);
+        if (this.recording) {
+            microphone.startRecording();
+        } else {
+            System.out.println(microphone.getAudioFormat());
+            Utterance utterance = microphone.getUtterance();
+            microphone.stopRecording();
+            System.out.println(analyse(utterance));
+        }
     }
 
+    @FXML
+    public void sayHut(){
+        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory+"/WAV/NEIN-AB.WAV"));
+        System.out.println(analyse(utterance));
+    }
+
+    @FXML
+    public void sayJa(){
+        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory+"/WAV/JA-AB.WAV"));
+        System.out.println(analyse(utterance));
+    }
+
+    @FXML
+    public void sayNein(){
+        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory+"/WAV/HUT-AB.WAV"));
+        System.out.println(analyse(utterance));
+    }
+
+    @FXML
+    public void sayGruen(){
+        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory+"/WAV/GRUEN-AB.WAV"));
+        System.out.println(analyse(utterance));
+    }
+
+    @FXML
+    public void sayA(){
+        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory+"/WAV/A-UA.WAV"));
+        System.out.println(analyse(utterance));
+    }
+
+    @FXML
+    public void sayM(){
+        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory+"/WAV/M-UA.WAV"));
+        System.out.println(analyse(utterance));
+    }
+
+    @FXML
+    public void sayS(){
+        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory+"/WAV/S-SB.WAV"));
+        System.out.println(analyse(utterance));
+    }
+
+    @FXML
+    public void sayU(){
+        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory+"/WAV/U-TB.WAV"));
+        System.out.println(analyse(utterance));
+    }
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {}
+    public void initialize(URL location, ResourceBundle resources) {
+        recordFeedback.setVisible(false);
+        microphone.initialize();
+        this.nn.train(trainingCases, phonemeList);
+        this.nn.test(testCases);
+        this.gc.train(trainingCases, phonemeList);
+        this.gc.test(testCases);
+        this.dtw.train(trainingCases, phonemeList);
+        this.dtw.test(trainingCases);
+
+    }
+
+    public String analyse(Utterance utterance){
+        if (utterance != null) {
+            return dtw.classify(utterance);
+        }
+        return "-1";
+    }
 }

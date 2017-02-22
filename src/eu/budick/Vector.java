@@ -12,12 +12,12 @@ import java.util.Arrays;
 public class Vector {
     private float[] values;
 
-    Vector() {
+    public Vector() {
         this.setValues(new float[13]);
         Arrays.fill(this.getValues(), 0);
     }
 
-    Vector(float[] values) {
+    public Vector(float[] values) {
         this.setValues(values);
     }
 
@@ -103,6 +103,12 @@ public class Vector {
 
     public void setValues(float[] values) {
         this.values = values;
+    }
+
+    public void fill(float number){
+        for (int i = 0; i < this.getValues().length; i++) {
+            this.setValue(i, number);
+        }
     }
 
     public void print() {

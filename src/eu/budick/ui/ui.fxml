@@ -5,37 +5,48 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
+<?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
 <AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="eu.budick.ui.Ui">
   <children>
     <TabPane layoutX="0.0" layoutY="0.0" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE">
       <tabs>
-        <Tab text="Exercise 2">
+        <Tab text="Recorder">
           <content>
             <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
               <children>
-                <Button layoutX="0.0" layoutY="73.0" mnemonicParsing="false" onAction="#handleNearestNeighbour" text="Nearest Neighbour" />
-                <Button layoutX="0.0" layoutY="253.0" mnemonicParsing="false" onAction="#handleGauss" prefWidth="145.0" text="Gaussian" />
-                <HBox layoutX="174.0" layoutY="0.0" prefHeight="364.0" prefWidth="426.0">
-                  <children>
-                    <TextArea fx:id="exerciseTwoOutput" prefHeight="364.0" prefWidth="426.0" wrapText="true" />
-                  </children>
-                </HBox>
-              </children>
-            </AnchorPane>
-          </content>
-        </Tab>
-        <Tab text="Exercise 3">
-          <content>
-            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-              <children>
-                <Button layoutX="267.0" layoutY="285.0" mnemonicParsing="false" onMousePressed="#startListen" onMouseReleased="#stopListen" text="Listen" />
+                <Button layoutX="267.0" layoutY="285.0" mnemonicParsing="false" onAction="#toggleRecord" text="Listen" />
                 <HBox layoutX="119.0" layoutY="132.0" prefHeight="100.0" prefWidth="362.0">
                   <children>
                     <TextArea fx:id="exerciseThreeOutput" prefHeight="100.0" prefWidth="362.0" wrapText="true" />
                   </children>
                 </HBox>
+                <Circle fx:id="recordFeedback" fill="#ff3333" layoutX="241.0" layoutY="296.0" radius="14.5" stroke="TRANSPARENT" strokeType="INSIDE" />
+                <Button layoutX="499.0" layoutY="261.0" minWidth="78.0" mnemonicParsing="false" onAction="#sayJa" text="Ja" textAlignment="CENTER" />
+                <Button layoutX="499.0" layoutY="286.0" minWidth="78.0" mnemonicParsing="false" onAction="#sayNein" text="Nein" textAlignment="CENTER" />
+                <Button layoutX="499.0" layoutY="311.0" minWidth="78.0" mnemonicParsing="false" onAction="#sayHut" text="Hut" textAlignment="CENTER" />
+                <Button layoutX="499.0" layoutY="335.0" minWidth="78.0" mnemonicParsing="false" onAction="#sayGruen" text="Gruen" textAlignment="CENTER" />
+                <Button layoutX="14.0" layoutY="256.0" minWidth="78.0" mnemonicParsing="false" onAction="#sayA" text="A" textAlignment="CENTER" />
+                <Button layoutX="14.0" layoutY="281.0" minWidth="78.0" mnemonicParsing="false" onAction="#sayM" text="M" textAlignment="CENTER" />
+                <Button layoutX="14.0" layoutY="306.0" minWidth="78.0" mnemonicParsing="false" onAction="#sayS" text="S" textAlignment="CENTER" />
+                <Button layoutX="14.0" layoutY="330.0" minWidth="78.0" mnemonicParsing="false" onAction="#sayU" text="U" textAlignment="CENTER" />
+              </children>
+            </AnchorPane>
+          </content>
+        </Tab>
+        <Tab text="Test">
+          <content>
+            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+              <children>
+                <Button layoutX="0.0" layoutY="73.0" mnemonicParsing="false" onAction="#handleNearestNeighbour" text="Nearest Neighbour" />
+                <Button layoutX="0.0" layoutY="253.0" mnemonicParsing="false" onAction="#handleDTW" prefWidth="145.0" text="DTW" />
+                <HBox layoutX="174.0" layoutY="0.0" prefHeight="364.0" prefWidth="426.0">
+                  <children>
+                    <TextArea fx:id="exerciseTwoOutput" prefHeight="364.0" prefWidth="426.0" wrapText="true" />
+                  </children>
+                </HBox>
+                <Button layoutX="0.0" layoutY="161.0" mnemonicParsing="false" onAction="#handleGauss" prefWidth="145.0" text="Gaussian" />
               </children>
             </AnchorPane>
           </content>

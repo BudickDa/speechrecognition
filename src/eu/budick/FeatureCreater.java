@@ -4,12 +4,16 @@ package eu.budick;
 import edu.cmu.sphinx.frontend.*;
 import edu.cmu.sphinx.frontend.util.AudioFileDataSource;
 import edu.cmu.sphinx.frontend.util.StreamDataSource;
+import edu.cmu.sphinx.frontend.util.Utterance;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 import edu.cmu.sphinx.util.props.PropertyException;
+import sun.misc.IOUtils;
 
+import javax.sound.sampled.AudioFileFormat;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.InvalidParameterException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,8 +26,8 @@ import java.util.logging.Logger;
 public class FeatureCreater {
     private FrontEnd frontEnd;
     private StreamDataSource audioSource;
-    private List<float[]> allFeatures;
     private int featureLength = -1;
+    private LinkedList<Vector> allFeatures;
 
     public FeatureCreater(ConfigurationManager cm, String frontEndName)
             throws IOException {
@@ -35,10 +39,9 @@ public class FeatureCreater {
         }
     }
 
-    public static List<float[]> getFeatures(FileInputStream inputAudioStream) {
+    public static List<Vector> getFeatures(Utterance audioData) {
         try {
-            URL url = FeatureCreater.class
-                    .getResource("frontend.config.xml");
+            URL url = new File(Util.resourcesDirectory + "/frontend.config.xml").toURI().toURL();
             ConfigurationManager cm = new ConfigurationManager(url);
             String frontEndName = "cepstraFrontEnd";
 
@@ -47,8 +50,14 @@ public class FeatureCreater {
             }
 
             FeatureCreater creator = new FeatureCreater(cm, frontEndName);
-            List<float[]> features = creator.processStream(inputAudioStream);
-            return features;
+            //List<float[]> features = creator.processStream(audioData);
+            try {
+                audioData.save(Util.resourcesDirectory + "/tmp/last.wav", AudioFileFormat.Type.WAVE);
+            }catch(IOException ioe){
+                System.out.println("Error: "+ioe.getMessage());
+            }
+            creator.processFile(Util.resourcesDirectory+"/tmp/last.wav");
+            return creator.allFeatures;
         } catch (IOException ioe) {
             System.err.println("I/O Error " + ioe);
         } catch (PropertyException p) {
@@ -57,11 +66,20 @@ public class FeatureCreater {
         return null;
     }
 
-    private List<float[]> processStream(FileInputStream inputAudioStream){
-        audioSource.setInputStream(inputAudioStream);
-        allFeatures = new LinkedList<float[]>();
+    private List<Vector> processStream(Utterance utterance) {
+        if(utterance==null){
+            throw new InvalidParameterException("Utterance is null");
+        }
+        audioSource.setInputStream(new ByteArrayInputStream(utterance.getAudio()));
+        allFeatures = new LinkedList<Vector>();
         this.getAllFeatures();
         return allFeatures;
+    }
+
+    public void processFile(String inputAudioFile) throws FileNotFoundException {
+        audioSource .setInputStream(new FileInputStream(inputAudioFile));
+        allFeatures = new LinkedList<Vector>();
+        this.getAllFeatures();
     }
 
     private void getAllFeatures() {
@@ -81,13 +99,13 @@ public class FeatureCreater {
                     for (int i = 0; i < featureData.length; i++) {
                         convertedData[i] = (float) featureData[i];
                     }
-                    allFeatures.add(convertedData);
+                    allFeatures.add(new Vector(convertedData));
                 } else if (feature instanceof FloatData) {
                     float[] featureData = ((FloatData) feature).getValues();
                     if (featureLength < 0) {
                         featureLength = featureData.length;
                     }
-                    allFeatures.add(featureData);
+                    allFeatures.add(new Vector(featureData));
                 }
                 feature = frontEnd.getData();
             }
