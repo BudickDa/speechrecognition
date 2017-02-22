@@ -9,3 +9,7 @@ O
 S
 U
 Y
+HUT
+GRUEN
+JA
+NEIN

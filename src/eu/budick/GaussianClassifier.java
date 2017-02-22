@@ -1,6 +1,7 @@
 package eu.budick;
 
 import java.util.ArrayList;
+import java.util.DoubleSummaryStatistics;
 
 /**
  * Created by daniel on 17.02.17.
@@ -17,6 +18,7 @@ public class GaussianClassifier extends Classifier {
                 bestDistance = distance;
             }
         }
+
         return this.phonemeList.get(bestIndex);
     }
 
@@ -31,7 +33,7 @@ public class GaussianClassifier extends Classifier {
         for (int i = 0; i < vector.length(); i++) {
             sum2 += Math.pow(vector.getValue(i) - meanVector.getValue(i), 2) / Math.pow(deviationVector.getValue(i), 2);
         }
-        return -2 * Math.log(1. / 11.) + sum1 + sum2;
+        return -2 * Math.log(1. / 15.) + sum1 + sum2;
 
     }
 }

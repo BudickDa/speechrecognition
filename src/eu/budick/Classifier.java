@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * Created by daniel on 17.02.17.
@@ -34,13 +35,16 @@ public class Classifier implements ClassifierInterface {
 
     public void train(ArrayList<String> trainingCases, ArrayList<String> phonemeList) {
         this.phonemeList = phonemeList;
-        for (String fileName : trainingCases) {
+        File folder = new File(Util.resourcesDirectory + "/WAV/");
+        for (File file : folder.listFiles()) {
+            String fileName = file.getName();
             String phonem = Util.getPhonem(fileName);
             Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory + "/WAV/" + fileName));
-            trainingsUtterances.add(utterance);
+            this.trainingsUtterances.add(utterance);
             List<Vector> features = FeatureCreater.getFeatures(utterance);
-            trainingsFeatures.add(features);
-            Vector v = features.get(features.size() / 2);
+            this.trainingsFeatures.add(features);
+            Vector v = new Vector();
+            v.fromUtterance(utterance);
             this.trainingsData.add(v);
             this.trainingsDataIndex.add(phonem);
         }
@@ -63,8 +67,8 @@ public class Classifier implements ClassifierInterface {
         for (String fileName : testCases) {
             String phonem = Util.getPhonem(fileName);
             Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory + "/WAV/" + fileName));
-            List<Vector> features = FeatureCreater.getFeatures(utterance);
-            Vector v = features.get(features.size() / 2);
+            Vector v = new Vector();
+            v.fromUtterance(utterance);
             String result = this.classify(v);
             if (phonem.equals(result)) {
                 this.matches++;

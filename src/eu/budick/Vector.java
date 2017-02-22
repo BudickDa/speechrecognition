@@ -1,10 +1,13 @@
 package eu.budick;
 
+import edu.cmu.sphinx.frontend.util.Utterance;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by daniel on 17.02.17.
@@ -109,6 +112,11 @@ public class Vector {
         for (int i = 0; i < this.getValues().length; i++) {
             this.setValue(i, number);
         }
+    }
+
+    public void fromUtterance(Utterance u){
+        List<Vector> features = FeatureCreater.getFeatures(u);
+        this.setValues(features.get(features.size() / 2).getValues());
     }
 
     public void print() {

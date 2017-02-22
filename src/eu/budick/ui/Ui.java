@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextArea;
 import javafx.scene.shape.Circle;
+
 import javax.sound.sampled.AudioFileFormat;
 import java.io.File;
 import java.io.IOException;
@@ -72,56 +73,56 @@ public class Ui implements Initializable {
             System.out.println(microphone.getAudioFormat());
             Utterance utterance = microphone.getUtterance();
             microphone.stopRecording();
-            System.out.println(analyse(utterance));
+            analyse(utterance);
         }
     }
 
     @FXML
-    public void sayHut(){
-        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory+"/WAV/NEIN-AB.WAV"));
-        System.out.println(analyse(utterance));
+    public void sayHut() {
+        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory + "/WAV/HUT-AB.WAV"));
+        analyse(utterance);
     }
 
     @FXML
-    public void sayJa(){
-        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory+"/WAV/JA-AB.WAV"));
-        System.out.println(analyse(utterance));
+    public void sayJa() {
+        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory + "/WAV/JA-AB.WAV"));
+        analyse(utterance);
     }
 
     @FXML
-    public void sayNein(){
-        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory+"/WAV/HUT-AB.WAV"));
-        System.out.println(analyse(utterance));
+    public void sayNein() {
+        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory + "/WAV/NEIN-AB.WAV"));
+        analyse(utterance);
     }
 
     @FXML
-    public void sayGruen(){
-        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory+"/WAV/GRUEN-AB.WAV"));
-        System.out.println(analyse(utterance));
+    public void sayGruen() {
+        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory + "/WAV/GRUEN-AB.WAV"));
+        analyse(utterance);
     }
 
     @FXML
-    public void sayA(){
-        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory+"/WAV/A-UA.WAV"));
-        System.out.println(analyse(utterance));
+    public void sayA() {
+        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory + "/WAV/A-UA.WAV"));
+        analyse(utterance);
     }
 
     @FXML
-    public void sayM(){
-        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory+"/WAV/M-UA.WAV"));
-        System.out.println(analyse(utterance));
+    public void sayM() {
+        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory + "/WAV/M-UA.WAV"));
+        analyse(utterance);
     }
 
     @FXML
-    public void sayS(){
-        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory+"/WAV/S-SB.WAV"));
-        System.out.println(analyse(utterance));
+    public void sayS() {
+        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory + "/WAV/S-SB.WAV"));
+        analyse(utterance);
     }
 
     @FXML
-    public void sayU(){
-        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory+"/WAV/U-TB.WAV"));
-        System.out.println(analyse(utterance));
+    public void sayU() {
+        Utterance utterance = Util.wavToUtterance(new File(Util.resourcesDirectory + "/WAV/U-TB.WAV"));
+        analyse(utterance);
     }
 
     @Override
@@ -134,13 +135,23 @@ public class Ui implements Initializable {
         this.gc.test(testCases);
         this.dtw.train(trainingCases, phonemeList);
         this.dtw.test(trainingCases);
-
     }
 
-    public String analyse(Utterance utterance){
+    public void analyse(Utterance utterance) {
+        exerciseThreeOutput.setText("");
         if (utterance != null) {
-            return dtw.classify(utterance);
+            Vector v = new Vector();
+            v.fromUtterance(utterance);
+            String n = nn.classify(v);
+            String g = gc.classify(v);
+            String d = dtw.classify(utterance);
+
+            exerciseThreeOutput.appendText("NearestNeighbour: " + n);
+            exerciseThreeOutput.appendText("\n");
+            exerciseThreeOutput.appendText("DTW: " + d);
+            exerciseThreeOutput.appendText("\n");
+        } else {
+            exerciseThreeOutput.appendText("Error: No Utterance");
         }
-        return "-1";
     }
 }
